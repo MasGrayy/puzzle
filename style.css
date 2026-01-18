@@ -1,0 +1,129 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(circle at top, #1a1a2e, #000);
+  font-family: 'Segoe UI', sans-serif;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.app {
+  width: 100%;
+  max-width: 420px;
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(18px);
+  border-radius: 24px;
+  padding: 20px;
+  box-shadow: 0 0 40px rgba(0,255,255,0.15);
+}
+
+header {
+  text-align: center;
+}
+
+.subtitle {
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+.info-card {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 8px;
+  margin: 15px 0;
+  padding: 10px;
+  background: rgba(0,0,0,0.4);
+  border-radius: 14px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.progress {
+  width: 100%;
+  height: 6px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.progress div {
+  height: 100%;
+  background: linear-gradient(90deg, cyan, magenta);
+  width: 0%;
+  transition: width 0.5s;
+}
+
+.stars {
+  text-align: center;
+  font-size: 22px;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  margin: 15px 0;
+}
+
+button, .upload {
+  flex: 1;
+  padding: 10px;
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(135deg, cyan, magenta);
+  color: black;
+  font-weight: bold;
+  text-align: center;
+}
+
+.upload input {
+  display: none;
+}
+
+.puzzle {
+  margin: 15px auto;
+  display: grid;
+  gap: 6px;
+}
+
+.tile {
+  width: 80px;
+  height: 80px;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.tile:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(0,255,255,0.6);
+}
+
+.empty {
+  background: rgba(0,0,0,0.6);
+}
+
+.leaderboard {
+  margin-top: 15px;
+}
+
+.leaderboard ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.leaderboard li {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}

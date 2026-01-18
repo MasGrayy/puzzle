@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Puzzle Foto Ultra</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app">
+  <header>
+    <h1>🧩 Puzzle Foto Ultra</h1>
+    <p class="subtitle">Neon • Level • Skor</p>
+  </header>
+
+  <div class="info-card">
+    <div id="levelText">Level 1</div>
+    <div id="timeText">⏱ 0s</div>
+    <div id="moveText">👆 0</div>
+    <div id="scoreText">⭐ 0</div>
+  </div>
+
+  <div class="progress">
+    <div id="progressBar"></div>
+  </div>
+
+  <div id="stars" class="stars">⭐⭐⭐</div>
+
+  <div class="controls">
+    <label class="upload">
+      Upload Foto
+      <input type="file" id="upload" accept="image/*">
+    </label>
+    <button onclick="shufflePuzzle()">Acak</button>
+  </div>
+
+  <div id="puzzle" class="puzzle"></div>
+
+  <div class="leaderboard">
+    <h3>🏆 Leaderboard</h3>
+    <ul id="leaderboard"></ul>
+  </div>
+</div>
+
+<script>
+let level = 1, score = 0, timer = 0, moves = 0, interval;
+let size, img;
+let tiles = [];
+
+const puzzle = document.getElementById("puzzle");
+const levelText = document.getElementById("levelText");
+const timeText = document.getElementById("timeText");
+const scoreText = document.getElementById("scoreText");
+const moveText = document.getElementById("moveText");
+const starsEl = document.getElementById("stars");
+const leaderboardEl = document.getElementById("leaderboard");
+const progressBar = document.getElementById("progressBar");
+
+const levels = [
+  { size: 3, img: "1.jpg", limit: 60 },
+  { size: 4, img: "2.jpg", limit: 90 },
+  { size: 5, img: "3.jpg", limit: 120 }
+];
+
+document.getElementById("upload").addEventListener("change", e => {
+  const file = e.target.files[0];
+  if (file) img = URL.createObjectURL(file);
+  renderPuzzle();
+});
+
+function startLevel() {
+  if (level > levels.length) {
+    saveScore();
+    alert("🎉 Semua level selesai!");
+    return;
+  }
+
+  clearInterval(interval);
+  timer = 0;
+  moves = 0;
+  updateUI();
+
+  interval = setInterval(() => {
+    timer++;
+    updateUI();
+  }, 1000);
+
+  size = levels[level - 1].size;
+  img = levels[level - 1].img;
+  levelText.textContent = "Level " + level;
+  starsEl.textContent = "⭐⭐⭐";
+
+  puzzle.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+  puzzle.style.width = puzzle.style.height = size * 80 + "px";
+
+  tiles = [];
+  for (let i = 0; i < size * size; i++) tiles.push(i);
+  shufflePuzzle();
+}
+
+function updateUI() {
+  timeText.textContent = "⏱ " + timer + "s";
+  scoreText.textContent = "⭐ " + score;
+  moveText.textContent = "👆 " + moves;
+  progressBar.style.width = Math.min((timer / levels[level-1].limit) * 100, 100) + "%";
+}
+
+function renderPuzzle() {
+  puzzle.innerHTML = "";
+  tiles.forEach((val, idx) => {
+    const tile = document.createElement("div");
+    tile.className = "tile neon";
+
+    if (val === size * size - 1) {
+      tile.classList.add("empty");
+    } else {
+      const x = (val % size) * 80;
+      const y = Math.floor(val / size) * 80;
+      tile.style.backgroundImage = `url('${img}')`;
+      tile.style.backgroundSize = `${size * 80}px ${size * 80}px`;
+      tile.style.backgroundPosition = `-${x}px -${y}px`;
+    }
+
+    tile.onclick = () => moveTile(idx);
+    puzzle.appendChild(tile);
+  });
+}
+
+function moveTile(i) {
+  const empty = tiles.indexOf(size * size - 1);
+  const valid = [empty-1, empty+1, empty-size, empty+size];
+
+  if (valid.includes(i)) {
+    [tiles[i], tiles[empty]] = [tiles[empty], tiles[i]];
+    moves++;
+    renderPuzzle();
+    checkWin();
+  }
+}
+
+function shufflePuzzle() {
+  for (let i = 0; i < 300; i++) {
+    const empty = tiles.indexOf(size * size - 1);
+    const movesArr = [empty-1, empty+1, empty-size, empty+size]
+      .filter(x => x >= 0 && x < tiles.length);
+    const rand = movesArr[Math.floor(Math.random()*movesArr.length)];
+    [tiles[empty], tiles[rand]] = [tiles[rand], tiles[empty]];
+  }
+  renderPuzzle();
+}
+
+function checkWin() {
+  if (tiles.every((v,i)=>v===i)) {
+    clearInterval(interval);
+    let star = 1;
+    if (timer <= levels[level-1].limit / 2 && moves < 50) star = 3;
+    else if (timer <= levels[level-1].limit) star = 2;
+
+    starsEl.textContent = "⭐".repeat(star);
+    score += star * 150;
+    updateUI();
+
+    setTimeout(() => {
+      level++;
+      startLevel();
+    }, 700);
+  }
+}
+
+function saveScore() {
+  let name = prompt("Masukkan nama pemain:");
+  if (!name) name = "Player";
+
+  const data = JSON.parse(localStorage.getItem("leaderboard") || "[]");
+  data.push({ name, score });
+  data.sort((a,b)=>b.score-a.score);
+  localStorage.setItem("leaderboard", JSON.stringify(data.slice(0,5)));
+  renderLeaderboard();
+}
+
+function renderLeaderboard() {
+  leaderboardEl.innerHTML = "";
+  const data = JSON.parse(localStorage.getItem("leaderboard") || "[]");
+  data.forEach((p,i)=>{
+    const li = document.createElement("li");
+    li.innerHTML = `<strong>#${i+1}</strong> ${p.name} <span>${p.score}</span>`;
+    leaderboardEl.appendChild(li);
+  });
+}
+
+renderLeaderboard();
+startLevel();
+</script>
+
+</body>
+</html>
